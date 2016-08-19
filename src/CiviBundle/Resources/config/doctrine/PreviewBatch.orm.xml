@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="CiviBundle\Entity\PreviewBatch" table="preview_batch">
+    <id name="user" type="string" column="user" length="63"/>
+    <id name="batch" type="string" column="batch" length="63"/>
+    <field name="message" type="text" column="message" length="65535" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="comment">A JSON-encoded object.</option>
+      </options>
+    </field>
+    <field name="createTime" type="datetime" column="create_time" nullable="false">
+      <options>
+        <option name="comment">The time at which the PreviewBatch was initially created.</option>
+        <option name="default">CURRENT_TIMESTAMP</option>
+      </options>
+    </field>
+  </entity>
+</doctrine-mapping>

@@ -1,0 +1,82 @@
+<?php
+
+namespace CiviBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Renderer
+ *
+ * @ORM\Table(name="renderer")
+ * @ORM\Entity
+ */
+class Renderer
+{
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="title", type="string", length=255, nullable=false)
+     */
+    private $title;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="os", type="string", length=63, nullable=false)
+     */
+    private $os;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="os_version", type="string", length=63, nullable=false)
+     */
+    private $osVersion;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="app", type="string", length=63, nullable=false)
+     */
+    private $app;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="app_version", type="string", length=63, nullable=false)
+     */
+    private $appVersion;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="icons", type="text", length=65535, nullable=false)
+     */
+    private $icons;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="options", type="text", length=65535, nullable=false)
+     */
+    private $options;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="last_seen", type="datetime", nullable=false)
+     */
+    private $lastSeen = 'CURRENT_TIMESTAMP';
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="renderer", type="string", length=63)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $renderer;
+
+
+}
+
