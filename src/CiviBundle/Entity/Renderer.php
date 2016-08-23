@@ -238,6 +238,20 @@ class Renderer
     }
 
     /**
+     * Set renderer
+     *
+     * @param string $renderer
+     *
+     * @return Renderer
+     */
+    public function setRenderer($renderer)
+    {
+        $this->renderer = $renderer;
+
+        return $this;
+    }
+
+    /**
      * Get options
      *
      * @return string

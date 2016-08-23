@@ -4,6 +4,7 @@ namespace CiviBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use CiviBundle\Entity\Renderer;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class DefaultController extends Controller {
@@ -36,8 +37,24 @@ class DefaultController extends Controller {
   public function rendererAction(Request $request, $rendername) {
     $this->denyAccessUnlessGranted('ROLE_RENDER');
 
+    $em = $this->getDoctrine()->getManager();
+    $renderer = $em->getRepository('CiviBundle:Renderer')->find($rendername);
 
-    return $response;
+    if (!$renderer) {
+      $renderer = new Renderer();
+      $renderer->setRenderer($rendername);
+    }
+
+    $this->createForm(new RendererType(), $renderer);
+    $form->handleRequest($request);
+
+    if ($form->isValid()) {
+      $em = $this->getDoctrine()->getManager();
+      $em->persist($renderer);
+      $em->flush();
+    }
+
+    return $this->view($form, 201);
   }
 
 }
