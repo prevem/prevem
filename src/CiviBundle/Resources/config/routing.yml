@@ -1,3 +1,15 @@
 civi_homepage:
     path:     /hello/{name}
     defaults: { _controller: CiviBundle:Default:index }
+
+civi_renderers:
+    pattern:  /renderers
+    defaults: { _controller: CiviBundle:Default:renderers, _format: json }
+    requirements:
+        _method: GET
+
+civi_renderer:
+    pattern:  /renderer/{rendername}
+    defaults: { _controller: CiviBundle:Default:renderer, _format: json }
+    requirements:
+        _method: PUT

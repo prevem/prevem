@@ -34,9 +34,9 @@ class PreviewTask
     private $renderer;
 
     /**
-     * @var string
+     * @var array
      *
-     * @ORM\Column(name="options", type="text", length=65535, nullable=false)
+     * @ORM\Column(name="options", type="json_array")
      */
     private $options;
 

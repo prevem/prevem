@@ -48,16 +48,16 @@ class Renderer
     private $appVersion;
 
     /**
-     * @var string
+     * @var array
      *
-     * @ORM\Column(name="icons", type="text", length=65535, nullable=false)
+     * @ORM\Column(name="icons", type="json_array")
      */
     private $icons;
 
     /**
-     * @var string
+     * @var array
      *
-     * @ORM\Column(name="options", type="text", length=65535, nullable=false)
+     * @ORM\Column(name="options", type="json_array")
      */
     private $options;
 

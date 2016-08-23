@@ -13,9 +13,9 @@ use Doctrine\ORM\Mapping as ORM;
 class PreviewBatch
 {
     /**
-     * @var string
+     * @var array
      *
-     * @ORM\Column(name="message", type="text", length=65535, nullable=false)
+     * @ORM\Column(name="message", type="json_array")
      */
     private $message;
 
