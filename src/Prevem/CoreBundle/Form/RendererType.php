@@ -1,6 +1,6 @@
 <?php
 
-namespace CiviBundle\Form;
+namespace Prevem\CoreBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -25,14 +25,14 @@ class RendererType extends AbstractType
             ->add('lastSeen')
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'CiviBundle\Entity\Renderer'
+            'data_class' => 'Prevem\CoreBundle\Entity\Renderer'
         ));
     }
 
@@ -41,6 +41,6 @@ class RendererType extends AbstractType
      */
     public function getName()
     {
-        return 'civibundle_renderer';
+        return 'prevem_core_renderer';
     }
 }

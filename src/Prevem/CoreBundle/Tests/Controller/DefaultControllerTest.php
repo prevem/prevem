@@ -1,6 +1,6 @@
 <?php
 
-namespace CiviBundle\Tests\Controller;
+namespace Prevem\CoreBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

@@ -1,0 +1,15 @@
+prevem_core_homepage:
+    path:     /hello/{name}
+    defaults: { _controller: PrevemCoreBundle:Default:index }
+
+prevem_core_renderers:
+    pattern:  /renderers
+    defaults: { _controller: PrevemCoreBundle:Default:renderers, _format: json }
+    requirements:
+        _method: GET
+
+prevem_core_renderer:
+    pattern:  /renderer/{rendername}
+    defaults: { _controller: PrevemCoreBundle:Default:renderer, _format: json }
+    requirements:
+        _method: PUT

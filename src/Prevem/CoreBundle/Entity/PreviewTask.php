@@ -1,6 +1,6 @@
 <?php
 
-namespace CiviBundle\Entity;
+namespace Prevem\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 

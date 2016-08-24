@@ -1,5 +1,5 @@
-civi:
-    resource: "@CiviBundle/Resources/config/routing.yml"
+prevem_core:
+    resource: "@PrevemCoreBundle/Resources/config/routing.yml"
     prefix:   /
 
 NelmioApiDocBundle:
