@@ -3,15 +3,15 @@ security:
         Symfony\Component\Security\Core\User\User: plaintext
 
     role_hierarchy:
-        ROLE_ADMIN:       ROLE_USER
-        ROLE_API:         ROLE_USER
-        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+        ROLE_COMPOSE:       ROLE_USER
+        ROLE_RENDER:        ROLE_USER
+        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_RENDER, ROLE_ALLOWED_TO_SWITCH]
 
     providers:
         in_memory:
             memory:
                 users:
-                    restapi:  { password: secretpw, roles: [ 'ROLE_API' ] }
+                    restapi:  { password: secretpw, roles: [ 'ROLE_COMPOSE', 'ROLE_RENDER' ] }
 
     firewalls:
         dev:

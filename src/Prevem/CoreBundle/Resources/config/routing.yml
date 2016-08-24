@@ -13,3 +13,7 @@ prevem_core_renderer:
     defaults: { _controller: PrevemCoreBundle:Default:renderer, _format: json }
     requirements:
         _method: PUT
+
+prevem_core_preview_batch:
+    pattern:  /previewBatch/{username}/{batch}
+    defaults: { _controller: PrevemCoreBundle:Default:previewBatch, _format: json }
