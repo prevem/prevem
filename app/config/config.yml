@@ -115,3 +115,4 @@ parameters:
     render_attempts: 2
     render_agent_ttl: 1209600
     max_token_ttl: 604800
+    image_dir: "%kernel.root_dir%/../web/files"

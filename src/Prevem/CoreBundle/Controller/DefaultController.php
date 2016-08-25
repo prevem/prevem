@@ -25,7 +25,9 @@ class DefaultController extends Controller
     public function renderersAction(Request $request) {
       $this->denyAccessUnlessGranted('ROLE_COMPOSE');
 
-      $ttl = $this->container->getParameter('render_agent_ttl');
+      $ttl = $request->query->get('render_agent_ttl');
+      // If render_agent_ttl GET argument not provided then set the default
+      $ttl = (!empty($ttl)) ? $ttl : $this->container->getParameter('render_agent_ttl');
 
       $renderers = $this->getEntity('Renderer',
         array('e.lastSeen >= CURRENT_TIMESTAMP() - :render_agent_ttl'),
@@ -74,7 +76,7 @@ class DefaultController extends Controller
         $em->flush();
       }
 
-      return new JsonResponse($data);
+      return new JsonResponse($data, 201);
     }
 
     /**
@@ -164,9 +166,14 @@ class DefaultController extends Controller
         if (!empty($task['finish_time'])) {
           // if finishTime is set and errorMessage is empty, then finished
           if (empty($task['error_message'])) {
-            //TODO: we need to set the imageUrl to absolute image url as
-            // web/files/{user}/{batch}/{md5(id . user . batch . renderer . options . createTime)}.png
-            // but how to fetch the root path ?
+            $task['imageUrl'] = $this->getImageFilePath(
+              $task['id'],
+              $task['user'],
+              $task['batch'],
+              $task['renderer'],
+              $task['options'],
+              strtotime($task['create_time']->format('Y-m-d H:i:s'))
+            );
             $status = 'finished';
           }
           // if finishTime is set and errorMessage is defined and attempts exceeds render_attempts, then failed
@@ -241,6 +248,55 @@ class DefaultController extends Controller
     }
 
     /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function previewTaskSubmitAction(Request $request) {
+      $data = json_decode($request->getContent(), TRUE);
+      $id = $data['id'];
+
+      $em = $this->getDoctrine()->getManager();
+      $previewTask = $em->getRepository('PrevemCoreBundle:PreviewTask')->find($id);
+
+      if (!$previewTask) {
+        return new JsonResponse('Preview task not found for id : ' . $id, 404);
+      }
+
+      if (!empty($data['image'])) {
+        $user = $previewTask->getUser();
+        $batch = $previewTask->getBatch();
+        $renderer = $previewTask->getRenderer();
+        $options = $previewTask->getOptions();
+        $createTime = strtotime($previewTask->getCreateTime()->format('Y-m-d H:i:s'));
+
+        //If image is provided, then store it in a file named
+        // web/files/{user}/{batch}/{md5(id . user . batch . renderer . options . createTime)}.png
+        $filePath = $this->getImageFilePath($id, $user, $batch, $renderer, $options, $createTime);
+
+         // Save the png file $fileName to desire filepath as $filePath
+        file_put_contents($filePath, base64_decode($data['image']));
+
+        $previewTask->setErrorMessage(NULL); //clear any PreviewTask.errorMessage.
+        $previewTask->setFinishTime(time()); //set PreviewTask.finishTime to now.
+      }
+      elseif (!empty($data['errorMessage'])) {
+        $rattempts = $this->container->getParameter('render_attempts');
+        if ($previewTask->getAttempts() >= $rattempts) {
+          $previewTask->setFinishTime(time()); //set PreviewTask.finishTime to now.
+        }
+        else {
+          $previewTask->setClaimTime(NULL); //set PreviewTask.claimTime to empty.
+        }
+      }
+
+      // Update PreviewTask Entity record
+      $em->persist($previewTask);
+      $em->flush();
+
+      return new JsonResponse();
+    }
+
+    /**
     * Retrieve record(s) of $entity based on provided where clauses passed in array format
     *
     * @param string $entity
@@ -266,4 +322,19 @@ class DefaultController extends Controller
       return $entities;
     }
 
+    /**
+    * Return the desired image file path as
+    * web/files/{user}/{batch}/{md5(id . user . batch . renderer . options . createTime)}.png
+    */
+    public function getImageFilePath($id, $user, $batch, $renderer, $options, $createTime) {
+      $imageDir = $this->container->getParameter('image_dir');
+      $filePath = implode('/', array(
+        $imageDir,
+        $user,
+        $batch
+      ));
+      $fileName =  md5($id . $user . $batch . $renderer . $options . $createTime) . '.png';
+
+      return $filePath . $fileName;
+    }
 }
