@@ -17,3 +17,21 @@ prevem_core_renderer:
 prevem_core_preview_batch:
     pattern:  /previewBatch/{username}/{batch}
     defaults: { _controller: PrevemCoreBundle:Default:previewBatch, _format: json }
+
+prevem_core_preview_batch_tasks:
+    pattern:  /previewBatch/{username}/{batch}/tasks
+    defaults: { _controller: PrevemCoreBundle:Default:previewBatchTasks, _format: json }
+    requirements:
+        _method: GET
+
+prevem_core_preview_task_claim:
+    pattern:  /previewTask/claim
+    defaults: { _controller: PrevemCoreBundle:Default:previewTaskClaim, _format: json }
+    requirements:
+        _method: POST
+
+prevem_core_preview_task_submit:
+    pattern:  /previewTask/submit
+    defaults: { _controller: PrevemCoreBundle:Default:previewTaskSubmit, _format: json }
+    requirements:
+        _method: POST
