@@ -128,11 +128,7 @@ class DefaultController extends Controller
             if (!empty($task['options'])) {
               $previewTask->setOptions($task['options']);
             }
-            else {
-              // TODO: what if options are not provided
-              // as per http://think.hm/tmp/prevem-spec/protocol/#1-composer-requests-a-preview
-              // then should we fetch the options from corresponding renderer's options ?
-            }
+
             $previewTask->setCreateTime(time());
             $em->persist($previewTask);
             $em->flush();
