@@ -23,7 +23,8 @@
         "friendsofsymfony/http-cache-bundle": "^1.0",
         "willdurand/hateoas-bundle": "^1.0",
         "hautelook/templated-uri-bundle": "^2.0",
-        "willdurand/rest-extra-bundle": "^1.0"
+        "willdurand/rest-extra-bundle": "^1.0",
+        "beberlei/DoctrineExtensions": "^1.0"
     },
     "require-dev": {
         "sensio/generator-bundle": "~2.3"

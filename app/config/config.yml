@@ -56,6 +56,9 @@ doctrine:
     orm:
         auto_generate_proxy_classes: %kernel.debug%
         auto_mapping: true
+        dql:
+            string_functions:
+                UNIX_TIMESTAMP: DoctrineExtensions\Query\Mysql\UnixTimestamp
 
 # Swiftmailer Configuration
 swiftmailer:

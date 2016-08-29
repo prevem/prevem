@@ -50,28 +50,28 @@ class PreviewTask
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="claim_time", type="datetime", nullable=false)
+     * @ORM\Column(name="claim_time", type="datetime")
      */
-    private $claimTime = '0000-00-00 00:00:00';
+    private $claimTime;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="finish_time", type="datetime", nullable=false)
+     * @ORM\Column(name="finish_time", type="datetime")
      */
-    private $finishTime = '0000-00-00 00:00:00';
+    private $finishTime;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="attempts", type="integer", nullable=false)
+     * @ORM\Column(name="attempts", type="integer")
      */
     private $attempts;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="error_message", type="text", length=65535, nullable=false)
+     * @ORM\Column(name="error_message", type="text", length=65535)
      */
     private $errorMessage;
 

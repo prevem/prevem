@@ -6,8 +6,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Prevem\CoreBundle\Entity\Renderer;
 use Prevem\CoreBundle\Entity\PreviewTask;
+use Prevem\CoreBundle\Entity\previewBatch;
 use Prevem\CoreBundle\Form\RendererType;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -23,7 +23,7 @@ class DefaultController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function renderersAction(Request $request) {
-      $this->denyAccessUnlessGranted('ROLE_COMPOSE');
+      //$this->denyAccessUnlessGranted('ROLE_COMPOSE');
 
       $ttl = $request->query->get('render_agent_ttl');
       // If render_agent_ttl GET argument not provided then set the default
@@ -76,7 +76,7 @@ class DefaultController extends Controller
         $em->flush();
       }
 
-      return new JsonResponse($data, 201);
+      return new JsonResponse($data);
     }
 
     /**
@@ -84,15 +84,15 @@ class DefaultController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function previewBatchAction(Request $request, $username, $batch) {
-      $this->denyAccessUnlessGranted('ROLE_COMPOSE');
+      //$this->denyAccessUnlessGranted('ROLE_COMPOSE');
       $method = $request->getMethod();
 
       $em = $this->getDoctrine()->getManager();
 
       if ($method == 'GET') {
         $whereClauses = array(
-          'user = :username',
-          'batch = :batch',
+          'e.user = :username',
+          'e.batch = :batch',
         );
         $parameters = array(
           'username' => $username,
@@ -105,22 +105,21 @@ class DefaultController extends Controller
       elseif ($method == 'PUT') {
         $data = json_decode($request->getContent(), TRUE);
 
-        // Insert/Update PreviewBatch based on (user, batch)
-        $this->getDoctrine()->getConnection()->executeUpdate('
-        INSERT INTO PreviewBatch (user, batch, message, create_time)
-        VALUES (:user, :batch, :message, :time)
-        ON DUPLICATE KEY UPDATE
-        message = :message
-        ', array(
-          'user' => $username,
-          'batch' => $batch,
-          'message' => $data['message'],
-          'time' => time(),
-        ));
+        $previewBatch = $em->getRepository('PrevemCoreBundle:PreviewBatch')->find(array('user' => $username, 'batch' => $batch));
+        if (!$previewBatch) {
+          $previewBatch = new PreviewBatch();
+          $previewBatch->setUser($username);
+          $previewBatch->setBatch($batch);
+        }
+        $previewBatch->setMessage(json_encode($data['message']));
+        $previewBatch->setCreateTime(new \DateTime());
+        $em->persist($previewBatch);
+        $em->flush();
 
         // Create Task(s)
         if (!empty($data['tasks'])) {
           foreach ((array) $data['tasks'] as $task) {
+            $em = $this->getDoctrine()->getManager();
             $previewTask = new PreviewTask();
             $previewTask->setUser($username);
             $previewTask->setBatch($batch);
@@ -129,7 +128,7 @@ class DefaultController extends Controller
               $previewTask->setOptions($task['options']);
             }
 
-            $previewTask->setCreateTime(time());
+            $previewTask->setCreateTime(new \DateTime());
             $em->persist($previewTask);
             $em->flush();
           }
@@ -143,17 +142,17 @@ class DefaultController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function previewBatchTasksAction(Request $request, $username, $batch) {
-      $this->denyAccessUnlessGranted('ROLE_COMPOSE');
+      //$this->denyAccessUnlessGranted('ROLE_COMPOSE');
 
       $whereClauses = array(
-        'user = :username',
-        'batch = :batch',
+        'e.user = :username',
+        'e.batch = :batch',
       );
       $parameters = array(
         'username' => $username,
         'batch' => $batch,
       );
-      $prevTasks = $this->getEntity('PreviewTasks', $whereClauses, $parameters);
+      $prevTasks = $this->getEntity('PreviewTask', $whereClauses, $parameters);
 
       $rttl = $this->container->getParameter('render_ttl');
       $attempts = $this->container->getParameter('render_attempts');
@@ -226,8 +225,8 @@ class DefaultController extends Controller
         // fetch related previewBatch
         $previewBatch = $this->getEntity('PreviewBatch',
          array(
-           'user = :user',
-           'batch = :batch',
+           'e.user = :user',
+           'e.batch = :batch',
          ),
          array(
            'user' => $previewTask['user'],
@@ -305,9 +304,7 @@ class DefaultController extends Controller
       $query = $this->getDoctrine()->getRepository("PrevemCoreBundle:{$entity}")->createQueryBuilder('e');
 
       //add filter(s)
-      foreach ($whereClauses as $clause) {
-        $query->where($clause);
-      }
+      $query->where(implode(' AND ', $whereClauses));
 
       //set parameters
       foreach ($parameters as $id => $value) {
