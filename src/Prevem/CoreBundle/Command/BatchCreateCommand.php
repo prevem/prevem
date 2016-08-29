@@ -51,29 +51,29 @@ class BatchCreateCommand extends ContainerAwareCommand
       $client = new Client();
       $client->setDefaultOption('headers', array('Accept' => 'application/json'));
       $client->put($url . "previewBatch/{$username}/{$batch}")
-            ->setBody(json_encode($jsonContent), 'application/json')
-            ->send();
+             ->setBody(json_encode($jsonContent), 'application/json')
+             ->send();
 
-        $bar = new ProgressBar($output, 10);
-        $bar->setBarCharacter('=');
-        $output->writeln("In progress");
+      $bar = new ProgressBar($output, 10);
+      $bar->setBarCharacter('=');
+      $output->writeln("In progress");
 
-        // Create outpath file path if not exist
-        $outputPath = $input->getOption('out');
-        if (!file_exists($outputPath)) {
-            mkdir($outputPath, 0777, true);
-        }
-        //retrieve json data and write the data to $outputPath/{$username}_{$batch}.json file
-        $jsonData = $client->get($url . "previewBatch/{$username}/{$batch}/tasks")->send()->getBody();
-        file_put_contents($outputPath . "/{$username}_{$batch}.json", $jsonData);
+      // Create outpath file path if not exist
+      $outputPath = $input->getOption('out');
+      if (!file_exists($outputPath)) {
+        mkdir($outputPath, 0777, true);
+      }
+      //retrieve json data and write the data to $outputPath/{$username}_{$batch}.json file
+      $jsonData = $client->get($url . "previewBatch/{$username}/{$batch}/tasks")->send()->getBody();
+      file_put_contents($outputPath . "/{$username}_{$batch}.json", $jsonData);
 
-        // Show progress bar and sleep for 1 sec :p
-        for ($i = 0; $i<10; $i++) {
-          usleep(50000); //total of 1sec
-          $bar->advance();
-        }
-        $bar->finish();
-        $output->writeln("\n");
+      // Show progress bar and sleep for 1 sec :p
+      for ($i = 0; $i < 10; $i++) {
+        usleep(50000); //total of 1sec
+        $bar->advance();
+      }
+      $bar->finish();
+      $output->writeln("\n");
     }
 
 }

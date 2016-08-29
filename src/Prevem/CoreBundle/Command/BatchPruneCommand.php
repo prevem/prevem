@@ -29,21 +29,22 @@ class BatchPruneCommand extends ContainerAwareCommand
         return 1;
       }
 
+      // Delete Preview tasks between $prevTime and $curTime
       $this->getContainer()->get('doctrine')
           ->getManager()
-          ->createQueryBuilder('e')
-          ->delete('PrevemCoreBundle:PreviewTask', 'e')
-          ->where('UNIX_TIMESTAMP(e.createTime) BETWEEN ' . $prevTime . ' AND ' . $curTime )
+          ->createQueryBuilder('pt')
+          ->delete('PrevemCoreBundle:PreviewTask', 'pt')
+          ->where('UNIX_TIMESTAMP(pt.createTime) BETWEEN ' . $prevTime . ' AND ' . $curTime )
           ->getQuery()
           ->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
       $io->success('Preview task(s) deleted successfully');
 
-
+      // Delete Preview batches between $prevTime and $curTime
       $this->getContainer()->get('doctrine')
           ->getManager()
-          ->createQueryBuilder('e')
-          ->delete('PrevemCoreBundle:PreviewBatch', 'e')
-          ->where('UNIX_TIMESTAMP(e.createTime) BETWEEN ' . $prevTime . ' AND ' . $curTime )
+          ->createQueryBuilder('pb')
+          ->delete('PrevemCoreBundle:PreviewBatch', 'pb')
+          ->where('UNIX_TIMESTAMP(pb.createTime) BETWEEN ' . $prevTime . ' AND ' . $curTime )
           ->getQuery()
           ->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
       $io->success('Preview batch(s) deleted successfully');

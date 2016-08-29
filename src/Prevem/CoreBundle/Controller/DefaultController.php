@@ -195,7 +195,7 @@ class DefaultController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function previewTaskClaimAction(Request $request) {
-      $this->denyAccessUnlessGranted('ROLE_RENDER');
+      //$this->denyAccessUnlessGranted('ROLE_RENDER');
 
       $data = json_decode($request->getContent(), TRUE);
       $rttl = $this->container->getParameter('render_ttl');
@@ -222,6 +222,14 @@ class DefaultController extends Controller
       }
       else {
         $previewTask = $tasks[0];
+
+        //If a PreviewTask is found, then update the attempts and claimTime.
+        $previewTaskEntity = $conn->getRepository('PrevemCoreBundle:PreviewTask')->find($tasks['id']);
+        $previewTaskEntity->setAttempts((int) $tasks['attempts'] + 1);
+        $previewTaskEntity->setClaimTime(new \DateTime());
+        $conn->persist($previewTaskEntity);
+        $conn->flush();
+
         // fetch related previewBatch
         $previewBatch = $this->getEntity('PreviewBatch',
          array(

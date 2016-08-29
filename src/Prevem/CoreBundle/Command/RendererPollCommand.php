@@ -22,7 +22,7 @@ class RendererPollCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-      $output->writeln('tadaaaaaah!');
+
     }
 
 }
