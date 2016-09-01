@@ -35,3 +35,9 @@ prevem_core_preview_task_submit:
     defaults: { _controller: PrevemCoreBundle:Default:previewTaskSubmit, _format: json }
     requirements:
         _method: POST
+
+prevem_core_user_login:
+    pattern:  /user/login
+    defaults: { _controller: PrevemCoreBundle:Default:login, _format: json }
+    requirements:
+        _method: POST

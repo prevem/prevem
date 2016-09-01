@@ -119,3 +119,9 @@ parameters:
     render_agent_ttl: 1209600
     max_token_ttl: 604800
     image_dir: "%kernel.root_dir%/../web/files"
+
+lexik_jwt_authentication:
+    private_key_path: "%kernel.root_dir%/../var/jwt/private.pem"
+    public_key_path:  "%kernel.root_dir%/../var/jwt/private.pem"
+    pass_phrase:      %jwt_key_pass_phrase%
+    token_ttl:        3600

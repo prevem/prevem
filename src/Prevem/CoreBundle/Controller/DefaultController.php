@@ -84,7 +84,7 @@ class DefaultController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function previewBatchAction(Request $request, $username, $batch) {
-      //$this->denyAccessUnlessGranted('ROLE_COMPOSE');
+      $this->denyAccessUnlessGranted('ROLE_COMPOSE');
       $method = $request->getMethod();
 
       $em = $this->getDoctrine()->getManager();
@@ -142,7 +142,7 @@ class DefaultController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function previewBatchTasksAction(Request $request, $username, $batch) {
-      //$this->denyAccessUnlessGranted('ROLE_COMPOSE');
+      $this->denyAccessUnlessGranted('ROLE_COMPOSE');
 
       $whereClauses = array(
         'e.user = :username',
@@ -195,7 +195,7 @@ class DefaultController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function previewTaskClaimAction(Request $request) {
-      //$this->denyAccessUnlessGranted('ROLE_RENDER');
+      $this->denyAccessUnlessGranted('ROLE_RENDER');
 
       $data = json_decode($request->getContent(), TRUE);
       $rttl = $this->container->getParameter('render_ttl');
@@ -297,6 +297,19 @@ class DefaultController extends Controller
       $em->flush();
 
       return new JsonResponse();
+    }
+
+    public function loginAction(Request $request) {
+      $data = json_decode($request->getContent(), TRUE);
+
+      if (empty($data['username']) && empty($data['password'])) {
+        throw new BadCredentialsException();
+      }
+
+      $token = $this->get('lexik_jwt_authentication.encoder')
+                    ->encode(['username' => $data['username']]);
+
+      return new JsonResponse(['token' => $token]);
     }
 
     /**
