@@ -77,7 +77,11 @@ class BatchCreateCommand extends ContainerAwareCommand
     }
 
     protected function getAuthorizedHeaders($username, $headers = array('Accept' => 'application/json')) {
-        $token = $this->getApplication()->getKernel()->getContainer()->get('lexik_jwt_authentication.encoder')->encode(['username' => $username]);
+        $token = $this->getApplication()
+                      ->getKernel()
+                      ->getContainer()
+                      ->get('lexik_jwt_authentication.encoder')
+                      ->encode(['username' => $username]);
         $headers['Authorization'] = 'Bearer ' . $token;
 
         return $headers;
