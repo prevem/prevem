@@ -36,7 +36,7 @@ class PreviewTask
     /**
      * @var array
      *
-     * @ORM\Column(name="options", type="json_array")
+     * @ORM\Column(name="options", type="json_array", nullable=true)
      */
     private $options;
 
@@ -50,28 +50,28 @@ class PreviewTask
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="claim_time", type="datetime")
+     * @ORM\Column(name="claim_time", type="datetime", nullable=true)
      */
     private $claimTime;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="finish_time", type="datetime")
+     * @ORM\Column(name="finish_time", type="datetime", nullable=true)
      */
     private $finishTime;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="attempts", type="integer")
+     * @ORM\Column(name="attempts", type="integer", nullable=true)
      */
     private $attempts;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="error_message", type="text", length=65535)
+     * @ORM\Column(name="error_message", type="text", length=65535, nullable=true)
      */
     private $errorMessage;
 

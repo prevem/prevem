@@ -49,7 +49,7 @@ class BatchCreateCommand extends ContainerAwareCommand
       }
 
       $client = new Client();
-      $client->setDefaultOption('headers', array('Accept' => 'application/json'));
+      $client->setDefaultOption('headers', $this->getAuthorizedHeaders($username));
       $client->put($url . "previewBatch/{$username}/{$batch}")
              ->setBody(json_encode($jsonContent), 'application/json')
              ->send();
@@ -76,4 +76,10 @@ class BatchCreateCommand extends ContainerAwareCommand
       $output->writeln("\n");
     }
 
+    protected function getAuthorizedHeaders($username, $headers = array('Accept' => 'application/json')) {
+        $token = $this->getApplication()->getKernel()->getContainer()->get('lexik_jwt_authentication.encoder')->encode(['username' => $username]);
+        $headers['Authorization'] = 'Bearer ' . $token;
+
+        return $headers;
+    }
 }

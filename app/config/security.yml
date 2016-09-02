@@ -1,25 +1,29 @@
 security:
     encoders:
-        Symfony\Component\Security\Core\User\User: plaintext
+        Prevem\CoreBundle\Entity\User:
+            algorithm: bcrypt
 
     role_hierarchy:
-        ROLE_USER:        [ROLE_COMPOSE, ROLE_RENDER]
-        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ALLOWED_TO_SWITCH]
+        ROLE_COMPOSE:      [ROLE_USER]
+        ROLE_RENDER:       [ROLE_USER]
+        ROLE_ADMIN:        [ROLE_COMPOSE, ROLE_RENDER]
+        ROLE_SUPER_ADMIN:  [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
     providers:
-        in_memory:
-            memory:
-                users:
-                    restapi:  { password: secretpw, roles: ROLE_USER }
+        #in_memory:
+            #memory:
+                #users:
+                    #restapi:  { password: secretpw, roles: ROLE_USER }
+        main:
+            entity: { class: Prevem\CoreBundle\Entity\User, property: username }
 
     firewalls:
-        dev:
-            pattern:  ^/(_(profiler|wdt)|css|images|js)/
-            security: false
-
         main:
             pattern: ^/
-            anonymous: ~
+            anonymous:  ~
             stateless:  true
             http_basic:
-                realm: "Demo REST API (username: restapi, password: secretpw)"
+                #realm: "Demo REST API (username: restapi, password: secretpw)"
+            guard:
+              authenticator:
+                          - jwt_token_authenticator

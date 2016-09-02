@@ -23,7 +23,7 @@ class DefaultController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function renderersAction(Request $request) {
-      //$this->denyAccessUnlessGranted('ROLE_COMPOSE');
+      $this->denyAccessUnlessGranted('ROLE_COMPOSE');
 
       $ttl = $request->query->get('render_agent_ttl');
       // If render_agent_ttl GET argument not provided then set the default
