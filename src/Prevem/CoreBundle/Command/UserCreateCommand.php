@@ -52,15 +52,10 @@ class UserCreateCommand extends ContainerAwareCommand
         $user = new User();
         $user->setUsername($username);
         //default set roles to ROLE_USER
-        $roles = empty($roles) ? array('ROLE_USER') : $roles;
+        $roles = empty($roles) ? array() : $roles;
       }
 
-      if (count($roles)) {
-        $user->setRoles($roles);
-      }
-      elseif ($action == 'created') {
-        $user->setRoles(array('ROLE_USER'));
-      }
+      $user->setRoles($roles);
 
       if (!empty($password)) {
         $encoder = $this->getContainer()->get('security.encoder_factory')->getEncoder($user);

@@ -12,8 +12,12 @@ use Symfony\Component\Console\Helper\ProgressBar;
 class BatchCreateCommand extends ContainerAwareCommand
 {
 
-  // ./app/console batch:create --subject 'Hello world'
-  // --text "Hello world" --render thunderlook,iphone --url 'http://user:pass@localhost:9000/' --out '/tmp/rendered/'
+  // ./app/console batch:create
+  //  --subject 'Hello world'
+  //  --text "Hello world"
+  //  --render thunderlook,iphone
+  //  --url 'http://user:pass@localhost:9000/'
+  //  --out '/tmp/rendered/'
   protected function configure()
     {
       $this->setName('batch:create')

@@ -50,6 +50,9 @@ class DefaultController extends Controller
       $em = $this->getDoctrine()->getManager();
       $renderer = $em->getRepository('PrevemCoreBundle:Renderer')->find($rendername);
 
+      //If lastSeen is not set then use the current datetime
+      $data['lastSeen'] = !empty($data['lastSeen']) ? $data['lastSeen'] : date('YmdHis');
+
       //If there is no renderer then create new
       if (!$renderer) {
         $this->getDoctrine()->getConnection()->executeUpdate('
@@ -62,8 +65,8 @@ class DefaultController extends Controller
             'os_ver' => $data['osVersion'],
             'app' => $data['app'],
             'app_ver' => $data['appVersion'],
-            'icons' => $data['icons'],
-            'options' => $data['options'],
+            'icons' => json_encode($data['icons']),
+            'options' => json_encode($data['options']),
             'last_seen' => $data['lastSeen'],
           )
         );
@@ -301,13 +304,27 @@ class DefaultController extends Controller
 
     public function loginAction(Request $request) {
       $data = json_decode($request->getContent(), TRUE);
+      if (empty($data['username'])) {
+        return new JsonResponse('Username is not provide', 401);
+      }
 
-      if (empty($data['username']) && empty($data['password'])) {
-        throw new BadCredentialsException();
+      $username = $data['username'];
+      $user = $this->getDoctrine()
+                   ->getManager()
+                   ->getRepository('PrevemCoreBundle:User')
+                   ->find($username);
+      if (!$user) {
+        return new JsonResponse('Username not found',  401);
+      }
+
+      // If ttl argument is passed
+      $ttl = $request->query->get('ttl');
+      if ($ttl) {
+        $this->container->setParameter('lexik_jwt_authentication.token_ttl', $ttl);
       }
 
       $token = $this->get('lexik_jwt_authentication.encoder')
-                    ->encode(['username' => $data['username']]);
+                    ->encode(['username' => $username]);
 
       return new JsonResponse(['token' => $token]);
     }
