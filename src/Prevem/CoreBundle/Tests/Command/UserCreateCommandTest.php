@@ -23,11 +23,11 @@ class UserCreateCommandTest extends WebTestCase
   public function testUserCreateUpdate() {
 
     $testCommands = array(
-      'app/console user:create',
-      sprintf('app/console user:create %s', $this->username),
-      sprintf('app/console user:create %s --pass=%s', $this->username, substr(sha1(rand()), 0, 8)),
-      sprintf('app/console user:create %s --role=%s', $this->username, 'admin'),
-      sprintf('app/console user:create %s --role=%s', $this->username, '')
+      'app/console user:create', // execute command without any other paramereter
+      sprintf('app/console user:create %s', $this->username), // provide only username
+      sprintf('app/console user:create %s --pass=%s', $this->username, substr(sha1(rand()), 0, 8)), // provide username and password
+      sprintf('app/console user:create %s --role=%s', $this->username, 'admin'), // update with role=admin parameter
+      sprintf('app/console user:create %s --role=%s', $this->username, '') // update role with null
     );
 
     // execute 'user:create'
