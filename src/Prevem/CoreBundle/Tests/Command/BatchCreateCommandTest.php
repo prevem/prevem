@@ -4,7 +4,6 @@ namespace Prevem\CoreBundle\Tests\Command;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Process\Process;
 
 class BatchCreateCommandTest extends WebTestCase
@@ -85,6 +84,9 @@ class BatchCreateCommandTest extends WebTestCase
 
   /**
    * Cleanup created data
+   * NOTE: We can also use batch:prune to clean up created tasks and batch but
+   *   this will also clean the other real data with test data.
+   *   So its better to delete ONLY the created test data manually
    *
    * @param array $params
    */
