@@ -36,7 +36,7 @@ class RendererPollCommandTest extends WebTestCase
           $this->renderer,
           __DIR__ . '/sample/render-script.php about'
       ),
-      'execute-render-script' => sprintf('php %s about', __DIR__ . '/sample/render-script.php'),
+      'execute-render-script' => sprintf('php %s about', __DIR__ . '/../sample/render-script.php'),
     );
 
     // Create user with role as ROLE_COMPOSE
