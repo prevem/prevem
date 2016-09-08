@@ -64,7 +64,7 @@ class PreviewTask
     /**
      * @var integer
      *
-     * @ORM\Column(name="attempts", type="integer", nullable=true)
+     * @ORM\Column(name="attempts", type="integer", nullable=true, options={"default" : 0})
      */
     private $attempts;
 

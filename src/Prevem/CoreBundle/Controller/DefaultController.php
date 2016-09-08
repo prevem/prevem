@@ -29,7 +29,7 @@ class DefaultController extends Controller
       // If render_agent_ttl GET argument not provided then set the default
       $ttl = (!empty($ttl)) ? $ttl : $this->container->getParameter('render_agent_ttl');
 
-      $renderers = $this->getEntity('Renderer',
+      $renderers = $this->get('prevem_core.prevem_utils')->getEntity('Renderer',
         array('e.lastSeen >= CURRENT_TIMESTAMP() - :render_agent_ttl'),
         array('render_agent_ttl' => $ttl)
       );
@@ -101,7 +101,7 @@ class DefaultController extends Controller
           'username' => $username,
           'batch' => $batch,
         );
-        $prevBatches = $this->getEntity('PreviewBatch', $whereClauses, $parameters);
+        $prevBatches = $this->get('prevem_core.prevem_utils')->getEntity('PreviewBatch', $whereClauses, $parameters);
 
         return new JsonResponse($prevBatches);
       }
@@ -155,7 +155,7 @@ class DefaultController extends Controller
         'username' => $username,
         'batch' => $batch,
       );
-      $prevTasks = $this->getEntity('PreviewTask', $whereClauses, $parameters);
+      $prevTasks = $this->get('prevem_core.prevem_utils')->getEntity('PreviewTask', $whereClauses, $parameters);
 
       $rttl = $this->container->getParameter('render_ttl');
       $attempts = $this->container->getParameter('render_attempts');
@@ -164,7 +164,7 @@ class DefaultController extends Controller
         if (!empty($task['finish_time'])) {
           // if finishTime is set and errorMessage is empty, then finished
           if (empty($task['error_message'])) {
-            $task['imageUrl'] = $this->getImageFilePath(
+            $task['imageUrl'] = $this->get('prevem_core.prevem_utils')->getImageFilePath(
               $task['id'],
               $task['user'],
               $task['batch'],
@@ -209,10 +209,13 @@ class DefaultController extends Controller
       $tasks = $conn->createQuery('
         SELECT pt
         FROM PrevemCoreBundle:PreviewTask pt
-        WHERE pt.renderer = :renderer AND pt.attempts < :render_attempts AND (pt.claim_time IS NULL OR pt.claim_time < NOW() - :render_ttl ) AND (pt.create_time > NOW() - :batch_ttl )
-        ORDER BY create_time ASC
-        LIMIT 1
+        WHERE pt.renderer = :renderer AND
+          ( pt.attempts < :render_attempts OR pt.attempts IS NULL ) AND
+          ( pt.claimTime IS NULL OR pt.claimTime < CURRENT_TIMESTAMP() - :render_ttl ) AND
+          ( pt.createTime > CURRENT_TIMESTAMP() - :batch_ttl )
+        ORDER BY pt.createTime ASC
       ')
+      ->setMaxResults(1)
       ->setParameter('renderer', $data['renderer'])
       ->setParameter('render_attempts', $rattempts)
       ->setParameter('render_ttl', $rttl)
@@ -227,14 +230,14 @@ class DefaultController extends Controller
         $previewTask = $tasks[0];
 
         //If a PreviewTask is found, then update the attempts and claimTime.
-        $previewTaskEntity = $conn->getRepository('PrevemCoreBundle:PreviewTask')->find($tasks['id']);
-        $previewTaskEntity->setAttempts((int) $tasks['attempts'] + 1);
+        $previewTaskEntity = $conn->getRepository('PrevemCoreBundle:PreviewTask')->find($previewTask['id']);
+        $previewTaskEntity->setAttempts((int) $previewTask['attempts'] + 1);
         $previewTaskEntity->setClaimTime(new \DateTime());
         $conn->persist($previewTaskEntity);
         $conn->flush();
 
         // fetch related previewBatch
-        $previewBatch = $this->getEntity('PreviewBatch',
+        $previewBatch = $this->get('prevem_core.prevem_utils')->getEntity('PreviewBatch',
          array(
            'e.user = :user',
            'e.batch = :batch',
@@ -245,7 +248,7 @@ class DefaultController extends Controller
          )
         );
         $response = array(
-          'PreviewBatch' => $PreviewBatch,
+          'PreviewBatch' => $previewBatch,
           'PreviewTask' => $previewTask,
         );
 
@@ -272,23 +275,24 @@ class DefaultController extends Controller
         $user = $previewTask->getUser();
         $batch = $previewTask->getBatch();
         $renderer = $previewTask->getRenderer();
-        $options = $previewTask->getOptions();
+        $options = json_encode($previewTask->getOptions());
         $createTime = strtotime($previewTask->getCreateTime()->format('Y-m-d H:i:s'));
 
         //If image is provided, then store it in a file named
         // web/files/{user}/{batch}/{md5(id . user . batch . renderer . options . createTime)}.png
-        $filePath = $this->getImageFilePath($id, $user, $batch, $renderer, $options, $createTime);
+        $filePath = $this->get('prevem_core.prevem_utils')
+                         ->getImageFilePath($id, $user, $batch, $renderer, $options, $createTime);
 
          // Save the png file $fileName to desire filepath as $filePath
         file_put_contents($filePath, base64_decode($data['image']));
 
         $previewTask->setErrorMessage(NULL); //clear any PreviewTask.errorMessage.
-        $previewTask->setFinishTime(time()); //set PreviewTask.finishTime to now.
+        $previewTask->setFinishTime(new \DateTime()); //set PreviewTask.finishTime to now.
       }
       elseif (!empty($data['errorMessage'])) {
         $rattempts = $this->container->getParameter('render_attempts');
         if ($previewTask->getAttempts() >= $rattempts) {
-          $previewTask->setFinishTime(time()); //set PreviewTask.finishTime to now.
+          $previewTask->setFinishTime(new \DateTime()); //set PreviewTask.finishTime to now.
         }
         else {
           $previewTask->setClaimTime(NULL); //set PreviewTask.claimTime to empty.
@@ -329,43 +333,4 @@ class DefaultController extends Controller
       return new JsonResponse(['token' => $token]);
     }
 
-    /**
-    * Retrieve record(s) of $entity based on provided where clauses passed in array format
-    *
-    * @param string $entity
-    * @param array $whereClauses
-    * @param array $parameters
-    *
-    * @return array $entites
-    */
-    public function getEntity($entity, $whereClauses = array(), $parameters = array()) {
-      $query = $this->getDoctrine()->getRepository("PrevemCoreBundle:{$entity}")->createQueryBuilder('e');
-
-      //add filter(s)
-      $query->where(implode(' AND ', $whereClauses));
-
-      //set parameters
-      foreach ($parameters as $id => $value) {
-        $query->setParameter($id, $value);
-      }
-      $entities = $query->getQuery()->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
-
-      return $entities;
-    }
-
-    /**
-    * Return the desired image file path as
-    * web/files/{user}/{batch}/{md5(id . user . batch . renderer . options . createTime)}.png
-    */
-    public function getImageFilePath($id, $user, $batch, $renderer, $options, $createTime) {
-      $imageDir = $this->container->getParameter('image_dir');
-      $filePath = implode('/', array(
-        $imageDir,
-        $user,
-        $batch
-      ));
-      $fileName =  md5($id . $user . $batch . $renderer . $options . $createTime) . '.png';
-
-      return $filePath . $fileName;
-    }
 }

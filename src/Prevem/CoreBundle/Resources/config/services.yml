@@ -4,5 +4,9 @@ services:
 #        arguments: [@service_id, "plain_value", %parameter%]
     jwt_token_authenticator:
         class:  Prevem\CoreBundle\Security\JwtTokenAuthenticator
-        #autowire: true
         arguments: ['@lexik_jwt_authentication.jwt_encoder', '@doctrine.orm.entity_manager']
+
+    prevem_core.prevem_utils:
+        class:  Prevem\CoreBundle\Utility
+        arguments: ['@lexik_jwt_authentication.jwt_encoder', '@doctrine.orm.entity_manager', '@service_container']
+

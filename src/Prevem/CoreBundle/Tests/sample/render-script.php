@@ -17,7 +17,7 @@ switch($action) {
     $job = json_decode(file_get_contents('php://stdin'),1);
     echo json_encode(array(
       'id' => $job['PreviewTask']['id'],
-      'image' => base64_encode(file_get_contents(__DIR__ . '/sample/thunderbird.png')),
+      'image' => base64_encode(file_get_contents(__DIR__ . '/thunderbird.png')),
     ));
     break;
 

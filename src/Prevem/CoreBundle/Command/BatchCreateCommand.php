@@ -53,7 +53,12 @@ class BatchCreateCommand extends ContainerAwareCommand
       }
 
       $client = new Client();
-      $client->setDefaultOption('headers', $this->getAuthorizedHeaders($username));
+      $headers = $this->getApplication()
+                      ->getKernel()
+                      ->getContainer()
+                      ->get('prevem_core.prevem_utils')
+                      ->getAuthorizedHeaders($username);
+      $client->setDefaultOption('headers', $headers);
       $client->put($url . "previewBatch/{$username}/{$batch}")
              ->setBody(json_encode($jsonContent), 'application/json')
              ->send();
@@ -80,14 +85,4 @@ class BatchCreateCommand extends ContainerAwareCommand
       $output->writeln("\n");
     }
 
-    protected function getAuthorizedHeaders($username, $headers = array('Accept' => 'application/json')) {
-        $token = $this->getApplication()
-                      ->getKernel()
-                      ->getContainer()
-                      ->get('lexik_jwt_authentication.encoder')
-                      ->encode(['username' => $username]);
-        $headers['Authorization'] = 'Bearer ' . $token;
-
-        return $headers;
-    }
 }
