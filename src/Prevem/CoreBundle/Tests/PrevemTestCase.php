@@ -7,7 +7,7 @@ use Guzzle\Http\Client;
 use Guzzle\Http\Exception\BadResponseException;
 use Symfony\Component\Process\Process;
 
-class TestController extends WebTestCase
+class PrevemTestCase extends WebTestCase
 {
   public $client = null;
   public $em;

@@ -2,11 +2,11 @@
 
 namespace Prevem\CoreBundle\Tests\Controller;
 
-use Prevem\CoreBundle\Tests\TestController;
+use Prevem\CoreBundle\Tests\PrevemTestCase;
 use Guzzle\Http\Exception\ClientErrorResponseException;
 use Symfony\Component\Process\Process;
 
-class DefaultControllerTest extends TestController
+class DefaultControllerTest extends PrevemTestCase
 {
 
   /**

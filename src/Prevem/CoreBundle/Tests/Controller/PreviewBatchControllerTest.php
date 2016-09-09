@@ -2,11 +2,11 @@
 
 namespace Prevem\CoreBundle\Tests\Controller;
 
-use Prevem\CoreBundle\Tests\TestController;
+use Prevem\CoreBundle\Tests\PrevemTestCase;
 use Guzzle\Http\Exception\BadResponseException;
 use Symfony\Component\Process\Process;
 
-class PreviewBatchControllerTest extends TestController
+class PreviewBatchControllerTest extends PrevemTestCase
 {
 
   /**
