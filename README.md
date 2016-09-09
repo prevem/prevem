@@ -18,7 +18,7 @@ All three components (prevem, the composer, and the renderer) have been/are bein
 git clone https://github.com/prevem/prevem.git
 cd prevem
 ```
-### 2. Generate the SSH keys for JWT Authenticator bundle
+### 2. Generate the SSH keys for JWT Authentication bundle
 ``` bash
 $ mkdir -p app/var/jwt
 $ openssl genrsa -out app/var/jwt/private.pem -aes256 4096

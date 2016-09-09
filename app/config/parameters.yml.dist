@@ -14,5 +14,5 @@ parameters:
     locale:            en
     secret:            ThisTokenIsNotSoSecretChangeIt
 
-    jwt_token_ttl: 3600              # provide JWT expiration time in sec e.g. 3600 sec = 1hr
+    jwt_token_ttl: 3600              # provide JWT expiration time in secs e.g. 3600 (= 1 hr)
     jwt_pass_phrase: ''
