@@ -63,7 +63,8 @@ class Utility {
   }
 
   /**
-  * Return valid JWT in header for Authorization, encoded with $username
+  * Return valid Bearer/Basic token in header for Authorization encoded in JWT/base64_encode respectively,
+  * with $username/password information
   *
   * @param string $username
   * @param array $headers

@@ -4,35 +4,35 @@ prevem_core_homepage:
 
 prevem_core_renderers:
     pattern:  /renderers
-    defaults: { _controller: PrevemCoreBundle:Default:renderers, _format: json }
+    defaults: { _controller: PrevemCoreBundle:Renderer:renderers, _format: json }
     requirements:
         _method: GET
 
 prevem_core_renderer:
     pattern:  /renderer/{rendername}
-    defaults: { _controller: PrevemCoreBundle:Default:renderer, _format: json }
+    defaults: { _controller: PrevemCoreBundle:Renderer:renderer, _format: json }
     requirements:
         _method: PUT
 
 prevem_core_preview_batch:
     pattern:  /previewBatch/{username}/{batch}
-    defaults: { _controller: PrevemCoreBundle:Default:previewBatch, _format: json }
+    defaults: { _controller: PrevemCoreBundle:PreviewBatch:previewBatch, _format: json }
 
 prevem_core_preview_batch_tasks:
     pattern:  /previewBatch/{username}/{batch}/tasks
-    defaults: { _controller: PrevemCoreBundle:Default:previewBatchTasks, _format: json }
+    defaults: { _controller: PrevemCoreBundle:PreviewBatch:previewBatchTasks, _format: json }
     requirements:
         _method: GET
 
 prevem_core_preview_task_claim:
     pattern:  /previewTask/claim
-    defaults: { _controller: PrevemCoreBundle:Default:previewTaskClaim, _format: json }
+    defaults: { _controller: PrevemCoreBundle:PreviewTask:previewTaskClaim, _format: json }
     requirements:
         _method: POST
 
 prevem_core_preview_task_submit:
     pattern:  /previewTask/submit
-    defaults: { _controller: PrevemCoreBundle:Default:previewTaskSubmit, _format: json }
+    defaults: { _controller: PrevemCoreBundle:PreviewTask:previewTaskSubmit, _format: json }
     requirements:
         _method: POST
 

@@ -25,6 +25,10 @@ class BatchCreateCommandTest extends WebTestCase
     $process->run();
   }
 
+  public function tearDown(){
+    $this->em->close();
+  }
+
   public function testBatchCreate() {
     //sample batch message
     $batchMessage = array(

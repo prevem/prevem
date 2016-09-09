@@ -27,6 +27,10 @@ class RendererPollCommandTest extends WebTestCase
     $process->run();
   }
 
+  public function tearDown(){
+    $this->em->close();
+  }
+
   public function testRendererPoll() {
     $testCommands = array(
       'user-create' => sprintf('app/console user:create %s --pass=%s --role=renderer,compose', $this->username, $this->password),
