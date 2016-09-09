@@ -71,9 +71,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
     if ($user instanceof UserInterface) {
       if ($this->isBasic) {
         list($username, $password) = explode(':', base64_decode($credentials));
-        if ($user) {
-          return $this->container->get('security.password_encoder')->isPasswordValid($user, $password, $user->getSalt());
-        }
+        return $this->container->get('security.password_encoder')->isPasswordValid($user, $password, $user->getSalt());
       }
       else {
         return TRUE;
