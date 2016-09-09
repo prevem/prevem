@@ -17,7 +17,7 @@ class DefaultController extends Controller
     public function loginAction(Request $request) {
       $data = json_decode($request->getContent(), TRUE);
       if (empty($data['username'])) {
-        return new JsonResponse('Username is not provide', 401);
+        return new JsonResponse('Username not provided', 401);
       }
 
       $username = $data['username'];

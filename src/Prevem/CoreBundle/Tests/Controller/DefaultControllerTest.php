@@ -3,8 +3,7 @@
 namespace Prevem\CoreBundle\Tests\Controller;
 
 use Prevem\CoreBundle\Tests\TestController;
-use Symfony\Component\BrowserKit\Cookie;
-use Guzzle\Http\Exception\BadResponseException;
+use Guzzle\Http\Exception\ClientErrorResponseException;
 use Symfony\Component\Process\Process;
 
 class DefaultControllerTest extends TestController
@@ -25,9 +24,40 @@ class DefaultControllerTest extends TestController
     $this->assertNotEmpty($responseData);
     $this->assertEquals(TRUE, array_key_exists('token', $responseData));
 
-    //TODO: assert bad credential exception
-
     $this->logout();
+  }
+
+  /**
+  * Test (method=POST| url=/user/login) with wrong username
+  */
+  public function testWrongUsernameLogin() {
+    $this->client->setDefaultOption('headers', array('Accept' => 'application/json'));
+    $jsonContent = json_encode(array('username' => 'asIfIcare'));
+    try {
+      $this->client->post("http://localhost:8000/user/login")
+                      ->setBody($jsonContent, 'application/json')
+                      ->send()
+                      ->json();
+    } catch (ClientErrorResponseException $e) {
+      $error = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+      $this->assertEquals("Username not found", $error);
+    }
+  }
+
+  /**
+  * Test (method=POST| url=/user/login) without username
+  */
+  public function testEmptyUsernameLogin() {
+    $this->client->setDefaultOption('headers', array('Accept' => 'application/json'));
+    try {
+      $this->client->post("http://localhost:8000/user/login")
+                      ->setBody('', 'application/json')
+                      ->send()
+                      ->json();
+    } catch (ClientErrorResponseException $e) {
+      $error = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+      $this->assertEquals("Username not provided", $error);
+    }
   }
 
 }

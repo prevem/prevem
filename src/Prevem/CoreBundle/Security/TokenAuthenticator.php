@@ -29,6 +29,11 @@ class TokenAuthenticator extends AbstractGuardAuthenticator {
   }
 
   public function getCredentials(Request $request) {
+    // bypass the login route (method=POST| url=/user/login) which is used to obtain valid JWT token
+    if ($request->getPathInfo() == '/user/login') {
+      return;
+    }
+
     $extractor = new AuthorizationHeaderTokenExtractor('Bearer', 'Authorization');
     $token = $extractor->extract($request);
 
