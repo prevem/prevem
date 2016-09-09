@@ -26,4 +26,4 @@ security:
                 #realm: "Demo REST API (username: restapi, password: secretpw)"
             guard:
               authenticator:
-                          - jwt_token_authenticator
+                          - token_authenticator

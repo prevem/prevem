@@ -70,10 +70,16 @@ class Utility {
   *
   * @return array $headers
   */
-  public function getAuthorizedHeaders($username, $headers = array('Accept' => 'application/json')) {
+  public function getAuthorizedHeaders($username, $password = NULL, $auth = 'Bearer', $headers = array('Accept' => 'application/json')) {
+    if ($auth == 'Basic') {
+      $token = base64_encode("{$username}:{$password}");
+    }
+    else {
       $token = $this->jwtEncoder->encode(['username' => $username]);
-      $headers['Authorization'] = 'Bearer ' . $token;
+    }
 
-      return $headers;
+    $headers['Authorization'] = sprintf("%s %s", $auth, $token);
+
+    return $headers;
   }
 }

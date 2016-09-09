@@ -116,6 +116,7 @@ class RendererPollCommandTest extends WebTestCase
       'previewTaskID' => $previewTask['id'],
       'previewBatchName' => $previewTask['batch'],
       'imageFilePath' => $imageFilePath,
+      'batchJsonFilePath' => sprintf("%s/%s_%s.json", __DIR__, $this->username, $previewTask['batch']),
     );
     $this->cleanup($params);
   }
@@ -152,6 +153,9 @@ class RendererPollCommandTest extends WebTestCase
     unlink($params['imageFilePath']);
     rmdir($imageFileDir . DIRECTORY_SEPARATOR . $params['previewBatchName']);
     rmdir($imageFileDir);
+
+    // delete batch json file created as a result of batch:create
+    unlink($params['batchJsonFilePath']);
   }
 
 }

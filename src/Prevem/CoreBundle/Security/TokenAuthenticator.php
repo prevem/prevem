@@ -13,15 +13,19 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoder;
 use Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\AuthorizationHeaderTokenExtractor;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class JwtTokenAuthenticator extends AbstractGuardAuthenticator {
+class TokenAuthenticator extends AbstractGuardAuthenticator {
 
   private $jwtEncoder;
   private $em;
+  private $container;
+  private $isBasic = FALSE;
 
-  public function __construct(JWTEncoder $jwtEncoder, EntityManager $em) {
+  public function __construct(JWTEncoder $jwtEncoder, EntityManager $em, ContainerInterface $container) {
     $this->jwtEncoder = $jwtEncoder;
     $this->em = $em;
+    $this->container = $container;
   }
 
   public function getCredentials(Request $request) {
@@ -29,13 +33,27 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator {
     $token = $extractor->extract($request);
 
     if (!$token) {
-      return new CustomUserMessageAuthenticationException('Invalid Token');
+      $extractor = new AuthorizationHeaderTokenExtractor('Basic', 'Authorization');
+      $token = $extractor->extract($request);
+      if (!$token) {
+        return new CustomUserMessageAuthenticationException('Invalid Token');
+      }
+      else {
+        $this->isBasic = TRUE;
+      }
     }
+
     return $token;
   }
 
   public function getUser($credentials, UserProviderInterface $userProvider) {
-    $data = $this->jwtEncoder->decode($credentials);
+    if ($this->isBasic) {
+      list($username, $password) = explode(':', base64_decode($credentials));
+      $data = array('username' => $username, 'password' => $password);
+    }
+    else {
+      $data = $this->jwtEncoder->decode($credentials);
+    }
 
     if ($data === FALSE) {
       throw new CustomUserMessageAuthenticationException('Invalid Token');
@@ -45,17 +63,28 @@ class JwtTokenAuthenticator extends AbstractGuardAuthenticator {
   }
 
   public function checkCredentials($credentials, UserInterface $user) {
-    return TRUE;
+    if ($user instanceof UserInterface) {
+      if ($this->isBasic) {
+        list($username, $password) = explode(':', base64_decode($credentials));
+        if ($user) {
+          return $this->container->get('security.password_encoder')->isPasswordValid($user, $password, $user->getSalt());
+        }
+      }
+      else {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
-     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
-     {
-         // TODO: Implement onAuthenticationFailure() method.
-     }
+  public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {
+    return new JsonResponse('Bad credential', 401);
+  }
 
      public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
      {
-         return TRUE;
+         return NULL;
      }
 
      public function supportsRememberMe()
