@@ -14,7 +14,7 @@ class PrevemTestCase extends WebTestCase
   public $username;
   public $prevem_util;
 
-  public function setUp() {
+  protected function setUp() {
     static::bootKernel();
     $this->username = 'test-user-' . substr(sha1(rand()), 0, 8);
     $this->client = new Client();

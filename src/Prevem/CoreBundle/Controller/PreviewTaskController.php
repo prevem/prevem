@@ -79,6 +79,8 @@ class PreviewTaskController extends Controller
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function previewTaskSubmitAction(Request $request) {
+      $this->denyAccessUnlessGranted('ROLE_RENDER');
+
       $data = json_decode($request->getContent(), TRUE);
       $id = $data['id'];
       $em = $this->getDoctrine()->getManager();

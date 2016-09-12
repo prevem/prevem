@@ -24,6 +24,7 @@ class Utility {
   */
   public function getImageFilePath($id, $user, $batch, $renderer, $options, $createTime) {
     $imageDir = $this->container->getParameter('image_dir');
+    $options = is_array($options) ? json_encode($options) : $options;
     $filePath = implode(DIRECTORY_SEPARATOR, array(
       $imageDir,
       $user,

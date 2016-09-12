@@ -90,18 +90,18 @@ class PreviewBatchController extends Controller
 
     $rttl = $this->container->getParameter('render_ttl');
     $attempts = $this->container->getParameter('render_attempts');
-    foreach ((array) $prevTasks as &$task) {
+    foreach ((array) $prevTasks as $key => $task) {
       $status = 'pending';
-      if (!empty($task['finish_time'])) {
+      if (!empty($task['finishTime'])) {
         // if finishTime is set and errorMessage is empty, then finished
-        if (empty($task['error_message'])) {
+        if (empty($task['errorMessage'])) {
           $task['imageUrl'] = $this->get('prevem_core.prevem_utils')->getImageFilePath(
             $task['id'],
             $task['user'],
             $task['batch'],
             $task['renderer'],
             $task['options'],
-            strtotime($task['create_time']->format('Y-m-d H:i:s'))
+            strtotime($task['createTime']->format('Y-m-d H:i:s'))
           );
           $status = 'finished';
         }
@@ -111,14 +111,14 @@ class PreviewBatchController extends Controller
         }
       }
       // if claimTime is set and it's not passed render_ttl, then rendering
-      elseif (!empty($task['claim_time']) &&
-        is_a($task['claim_time'], 'DateTime') &&
-        // if claim_time is less than today + render_ttl
-        (strtotime($task['claim_time']->format('Y-m-d H:i:s')) < (time() + $rttl))
+      elseif (!empty($task['claimTime']) &&
+        is_a($task['claimTime'], 'DateTime') &&
+        // if claimTime is less than today + render_ttl
+        (strtotime($task['claimTime']->format('Y-m-d H:i:s')) < (time() + $rttl))
       ) {
         $status = 'rendering';
       }
-      $task['status'] = $status;
+      $prevTasks[$key]['status'] = $status;
     }
 
     return new JsonResponse(array('tasks' => $prevTasks));
