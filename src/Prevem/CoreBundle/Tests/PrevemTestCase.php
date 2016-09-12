@@ -50,6 +50,33 @@ class PrevemTestCase extends WebTestCase
   }
 
   /**
+   * Delete entities provided by $params contain data in array('Entity' => 'Identifier')
+   * sometime entity may denote any file that needs to be deleted
+   *
+   * @param array $params
+   */
+  protected function cleanUp($params) {
+    foreach ($params as $entityName => $identifier) {
+      switch ($entityName) {
+        case 'PreviewBatch':
+        case 'PreviewTask':
+        case 'Renderer':
+        case 'User':
+          $entity = $this->em->getRepository("PrevemCoreBundle:{$entityName}")->find($identifier);
+          $this->em->remove($entity);
+          $this->em->flush();
+          break;
+
+        default:
+          if (file_exists($identifier)) {
+            unlink($identifier);
+          }
+          break;
+      }
+    }
+  }
+
+  /**
    * Delete user
    */
   public function logOut() {

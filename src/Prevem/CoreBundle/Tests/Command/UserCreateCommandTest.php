@@ -2,26 +2,17 @@
 
 namespace Prevem\CoreBundle\Tests\Command;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Prevem\CoreBundle\Tests\PrevemTestCase;
 use Symfony\Component\Process\Process;
 
-class UserCreateCommandTest extends WebTestCase
+class UserCreateCommandTest extends PrevemTestCase
 {
 
-  private $client = null;
-  private $username;
-  private $em;
-
-  public function setUp() {
-    $this->client = static::createClient();
-    $this->username = 'test-user-' . substr(sha1(rand()), 0, 8);
-    $this->em = static::$kernel->getContainer()->get('doctrine')->getManager();
-  }
-
+  /**
+   * Unit test for user:create to assert different use-cases
+   */
   public function testUserCreateUpdate() {
-
+    // set of commands we need to test
     $testCommands = array(
       'app/console user:create', // execute command without any other paramereter
       sprintf('app/console user:create %s', $this->username), // provide only username
@@ -65,8 +56,6 @@ class UserCreateCommandTest extends WebTestCase
     $user = $this->em->getRepository('PrevemCoreBundle:User')->find($this->username);
     $this->assertEquals(array(0 => ''), $user->getRoles());
 
-    //delete the desired username created
-    $this->em->remove($user);
-    $this->em->flush();
+    $this->logOut();
   }
 }

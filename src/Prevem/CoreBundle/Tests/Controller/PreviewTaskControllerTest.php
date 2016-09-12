@@ -4,7 +4,6 @@ namespace Prevem\CoreBundle\Tests\Controller;
 
 use Prevem\CoreBundle\Tests\PrevemTestCase;
 use Guzzle\Http\Exception\ClientErrorResponseException;
-use Symfony\Component\Process\Process;
 
 class PreviewTaskControllerTest extends PrevemTestCase
 {
@@ -53,5 +52,5 @@ class PreviewTaskControllerTest extends PrevemTestCase
   * NOTE: \Prevem\CoreBundle\Tests\Controller\Command\RendererPollCommandTest unit test already cover the
   *  routes (method=POST| url=/previewTask/claim) and (method=POST| url=/previewTask/submit) so don't need to
   *  have separate unit tests to assert its functionality
-  */  
+  */
 }

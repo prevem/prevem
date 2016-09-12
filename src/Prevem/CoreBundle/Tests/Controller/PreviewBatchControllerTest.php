@@ -16,6 +16,7 @@ public $batchMessage = NULL;
   protected function setUp() {
     parent::setUp();
 
+    $this->renderer = 'renderer-' . substr(sha1(rand()), 0, 4);
     $this->batchName = 'prevem-cli-' . substr(sha1(rand()), 0, 4);
     $this->batchMessage = array(
       'from' => 'Test User <test.user@prevem.com>',
@@ -23,9 +24,11 @@ public $batchMessage = NULL;
       'body_text' => 'Body Text',
       'body_html' => '<html><body>Body Text</body></html>',
     );
-    $this->renderer = 'renderer-' . substr(sha1(rand()), 0, 4);
   }
 
+  /**
+   * Create sample preview batch tasks via route (method=PUT| url=/previewBatch/{username}/{batch})
+   */
   public function createBatchTask($url) {
     $jsonContent =  array(
       'message' => $this->batchMessage,
@@ -41,6 +44,9 @@ public $batchMessage = NULL;
                  ->send();
   }
 
+  /**
+   * Fetch sample preview batch tasks via route (method=GET| url=/previewBatch/{username}/{batch}/tasks)
+   */
   public function getBatchTask($url) {
     $batchTasks = $this->client->get($url . "previewBatch/{$this->username}/{$this->batchName}/tasks")
                       ->send()
@@ -93,18 +99,12 @@ public $batchMessage = NULL;
     $this->assertEquals($batch['batch'], $this->batchName);
 
     // ***************** Cleanup ******************
-    // delete related preview task
-    $previewTask = $this->em->getRepository('PrevemCoreBundle:PreviewTask')->find($previewTask['id']);
-    $this->em->remove($previewTask);
-    $this->em->flush();
-    // delete preview batch
-    $previewBatch = $this->em
-                         ->getRepository('PrevemCoreBundle:PreviewBatch')
-                         ->find(array('user' => $this->username, 'batch' => $this->batchName));
-    $this->em->remove($previewBatch);
-    $this->em->flush();
-
-    $this->logout();
+    $params = array(
+      'PreviewTask' => $previewTask['id'],
+      'PreviewBatch' => array('batch' => $this->batchName, 'user' => $this->username),
+      'User' => $this->username,
+    );
+    $this->cleanUp($params);
   }
 
   /**
@@ -225,18 +225,12 @@ public $batchMessage = NULL;
     $this->assertEquals('rendering', $previewTask['status']);
 
     // ***************** Cleanup ******************
-    // delete related preview task
-    $previewTask = $this->em->getRepository('PrevemCoreBundle:PreviewTask')->find($previewTaskID);
-    $this->em->remove($previewTask);
-    $this->em->flush();
-    // delete preview batch
-    $previewBatch = $this->em
-                         ->getRepository('PrevemCoreBundle:PreviewBatch')
-                         ->find(array('user' => $this->username, 'batch' => $this->batchName));
-    $this->em->remove($previewBatch);
-    $this->em->flush();
-
-    $this->logout();
+    $params = array(
+      'PreviewTask' => $previewTaskID,
+      'PreviewBatch' => array('batch' => $this->batchName, 'user' => $this->username),
+      'User' => $this->username,
+    );
+    $this->cleanUp($params);
   }
 
   /**

@@ -2,41 +2,34 @@
 
 namespace Prevem\CoreBundle\Tests\Command;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
+use Prevem\CoreBundle\Tests\PrevemTestCase;
 use Symfony\Component\Process\Process;
 
-class RendererPollCommandTest extends WebTestCase
+class RendererPollCommandTest extends PrevemTestCase
 {
 
-  private $client = null;
-  private $username;
-  private $password;
   private $renderer;
-  private $em;
 
-  public function setUp() {
-    $this->client = static::createClient();
-    $this->username = 'test-user-' . substr(sha1(rand()), 0, 8);
-    $this->password = substr(sha1(rand()), 0, 8);
+  protected function setUp() {
+    parent::setUp();
     $this->renderer = 'dummy-' . substr(sha1(rand()), 0, 4);
-    $this->em = static::$kernel->getContainer()->get('doctrine')->getManager();
-
-    //start server
-    $process = new Process('app/console server:start');
-    $process->run();
   }
 
-  public function tearDown(){
-    $this->em->close();
-  }
-
+  /**
+   * This unit test perform the following tasks:
+   *  1. Create sample preview Batch and Tasks via batch:create command
+   *  2. Claim and submit the eligible preview task just created
+   *  3. Assert the mail snapshot and other data
+   */
   public function testRendererPoll() {
+    // Create user with roles ROLE_COMPOSE and ROLE_RENDER
+    $url = $this->logIn('renderer,compose');
+
+    // set of commands to test
     $testCommands = array(
-      'user-create' => sprintf('app/console user:create %s --pass=%s --role=renderer,compose', $this->username, $this->password),
       'batch-create' => sprintf(
         'app/console batch:create --url=%s --from=\'%s\' --subject=\'%s\' --text=\'%s\' --render=%s --out=%s',
-          sprintf('http://%s:%s@localhost:8000/', $this->username, $this->password),
+          $url,
           'Test User <test.user@prevem.com>',
           'Subject ' . substr(sha1(rand()), 0, 4),
           'Body Text',
@@ -45,17 +38,12 @@ class RendererPollCommandTest extends WebTestCase
       ),
       'renderer-poll' => sprintf(
         'app/console renderer:poll --url=%s --name=%s --cmd=\'%s\'',
-          sprintf('http://%s:%s@localhost:8000/', $this->username, $this->password),
+          $url,
           $this->renderer,
           __DIR__ . '/../sample/render-script.php'
       ),
       'execute-render-script' => sprintf('php %s about', __DIR__ . '/../sample/render-script.php'),
     );
-
-    // Create user with roles - ROLE_COMPOSE and ROLE_RENDER
-    $process = new Process($testCommands['user-create']);
-    $process->run();
-    $this->assertEquals(TRUE, $process->isSuccessful());
 
     // Create sample preview batch-task for render polling
     $process = new Process($testCommands['batch-create']);
@@ -116,50 +104,28 @@ class RendererPollCommandTest extends WebTestCase
                                  );
     $this->assertEquals(TRUE, file_exists($imageFilePath));
 
+    // cleanup data
     $params = array(
-      'previewTaskID' => $previewTask['id'],
-      'previewBatchName' => $previewTask['batch'],
+      'PreviewTask' => $previewTask['id'],
+      'PreviewBatch' => array('batch' => $previewTask['batch'], 'user' => $this->username),
+      'Renderer' => $this->renderer,
+      'User' => $this->username,
       'imageFilePath' => $imageFilePath,
       'batchJsonFilePath' => sprintf("%s/%s_%s.json", __DIR__, $this->username, $previewTask['batch']),
     );
-    $this->cleanup($params);
+    $this->cleanUp($params);
   }
 
   /**
    * Cleanup created data
    */
   protected function cleanUp($params) {
-    //delete preview task
-    $previewTask = $this->em->getRepository('PrevemCoreBundle:PreviewTask')->find($params['previewTaskID']);
-    $this->em->remove($previewTask);
-    $this->em->flush();
+    parent::cleanUp($params);
 
-    //delete preview batch
-    $previewBatch = $this->em
-                         ->getRepository('PrevemCoreBundle:PreviewBatch')
-                         ->find(array('batch' => $params['previewBatchName'], 'user' => $this->username));
-    $this->em->remove($previewBatch);
-    $this->em->flush();
-
-    //delete renderer created
-    $renderer = $this->em->getRepository('PrevemCoreBundle:Renderer')->find($this->renderer);
-    $this->em->remove($renderer);
-    $this->em->flush();
-
-    //delete the desired username created
-    $user = $this->em->getRepository('PrevemCoreBundle:User')->find($this->username);
-    $this->assertEquals($this->username, $user->getUsername());
-    $this->em->remove($user);
-    $this->em->flush();
-
-    // delete image file path
+    // delete image file directories
     $imageFileDir = static::$kernel->getContainer()->getParameter('image_dir') . DIRECTORY_SEPARATOR . $this->username;
-    unlink($params['imageFilePath']);
-    rmdir($imageFileDir . DIRECTORY_SEPARATOR . $params['previewBatchName']);
+    rmdir($imageFileDir . DIRECTORY_SEPARATOR . $params['PreviewBatch']['batch']);
     rmdir($imageFileDir);
-
-    // delete batch json file created as a result of batch:create
-    unlink($params['batchJsonFilePath']);
   }
 
 }

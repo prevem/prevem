@@ -2,34 +2,19 @@
 
 namespace Prevem\CoreBundle\Tests\Command;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
+use Prevem\CoreBundle\Tests\PrevemTestCase;
 use Symfony\Component\Process\Process;
 
-class BatchCreateCommandTest extends WebTestCase
+class BatchCreateCommandTest extends PrevemTestCase
 {
 
-  private $client = null;
-  private $username;
-  private $password;
-  private $em;
-
-  public function setUp() {
-    $this->client = static::createClient();
-    $this->username = 'test-user-' . substr(sha1(rand()), 0, 8);
-    $this->password = substr(sha1(rand()), 0, 8);
-    $this->em = static::$kernel->getContainer()->get('doctrine')->getManager();
-
-    //start server
-    $process = new Process('app/console server:start');
-    $process->run();
-  }
-
-  public function tearDown(){
-    $this->em->close();
-  }
-
+  /**
+   * Unit test for user:create to create preview batch and its desired tasks and assert the created data
+   */
   public function testBatchCreate() {
+    // Create user with role as ROLE_COMPOSE
+    $url = $this->logIn('compose');
+
     //sample batch message
     $batchMessage = array(
       'from' => 'Test User <test.user@prevem.com>',
@@ -39,10 +24,9 @@ class BatchCreateCommandTest extends WebTestCase
 
     //set commands to be tested
     $testCommands = array(
-      'user-create' => sprintf('app/console user:create %s --pass=%s --role=compose', $this->username, $this->password),
       'batch-create' => sprintf(
         'app/console batch:create --url=%s --from=\'%s\' --subject=\'%s\' --text=\'%s\' --render=%s --out=%s',
-          sprintf('http://%s:%s@localhost:8000/', $this->username, $this->password),
+          $url,
           $batchMessage['from'],
           $batchMessage['subject'],
           $batchMessage['body'],
@@ -50,11 +34,6 @@ class BatchCreateCommandTest extends WebTestCase
           __DIR__
       ),
     );
-
-    // Create user with role as ROLE_COMPOSE
-    $process = new Process($testCommands['user-create']);
-    $process->run();
-    $this->assertEquals(TRUE, $process->isSuccessful());
 
     // Create user with role as ROLE_COMPOSE
     $process = new Process($testCommands['batch-create']);
@@ -79,39 +58,12 @@ class BatchCreateCommandTest extends WebTestCase
     $this->assertEquals($batchMessage['body'], $message['body_text']);
 
     $params = array(
-      'previewTask' => $previewTask['id'],
-      'previewBatch' => $previewBatch,
+      'PreviewTask' => $previewTask['id'],
+      'PreviewBatch' => array('batch' => $previewTask['batch'], 'user' => $this->username),
+      'User' => $this->username,
       'jsonFilePath' => $jsonFilePath,
     );
     $this->cleanUp($params);
-  }
-
-  /**
-   * Cleanup created data
-   * NOTE: We can also use batch:prune to clean up created tasks and batch but
-   *   this will also clean the other real data with test data.
-   *   So its better to delete ONLY the created test data manually
-   *
-   * @param array $params
-   */
-  protected function cleanUp($params) {
-    //delete previewTask created
-    $previewTask = $this->em->getRepository('PrevemCoreBundle:PreviewTask')->find($params['previewTask']);
-    $this->em->remove($previewTask);
-    $this->em->flush();
-
-    //delete previewBatch created
-    $this->em->remove($params['previewBatch']);
-    $this->em->flush();
-
-    //delete the desired username created
-    $user = $this->em->getRepository('PrevemCoreBundle:User')->find($this->username);
-    $this->assertEquals($this->username, $user->getUsername());
-    $this->em->remove($user);
-    $this->em->flush();
-
-    //delete the preview task json file created
-    unlink($params['jsonFilePath']);
   }
 
 }

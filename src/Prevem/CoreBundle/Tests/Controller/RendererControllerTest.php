@@ -50,11 +50,11 @@ class RendererControllerTest extends PrevemTestCase
     $this->assertNotEmpty($renderers);
 
     // clean up
-    $renderer = $this->em->getRepository('PrevemCoreBundle:Renderer')->find($renderer);
-    $this->em->remove($renderer);
-    $this->em->flush();
-
-    $this->logout();
+    $params = array(
+      'Renderer' => $renderer,
+      'User' => $this->username,
+    );
+    $this->cleanUp($params);
   }
 
   /**
