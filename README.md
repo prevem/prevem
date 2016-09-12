@@ -68,7 +68,7 @@ $ app/console user:create alice --pass=n3ws3cr3t
 ### 3. Launch a Renderer
 The first CLI tool, ```renderer:poll```, makes it easier to write a new renderer. A renderer must poll an HTTP resource, then perform some custom rendering logic, and then post another HTTP resource. This tool lets you write a quick-and-dirty renderer without boilerplate code for HTTP. To use it, create a dummy [rendering script](https://github.com/prevem/prevem/tree/master/src/Prevem/CoreBundle/Tests/sample/render-script.php) say ```examples/dummy-render.php```. Then execute the CLI as
 ``` bash
-$ app/console renderer:poll --url 'http://alice:s3cr3t@prevem.l/' --name=dummy-renderer --cmd=examples/dummy-render.php
+$ app/console renderer:poll --url 'http://alice:s3cr3t@localhost:8000/' --name=dummy-renderer --cmd=examples/dummy-render.php
 ```
 ( NOTE: user must have ```renderer``` role to run this command )
 
@@ -118,3 +118,4 @@ PHPUnit 4.8.21 by Sebastian Bergmann and contributors.
 Time: 8.75 seconds, Memory: 29.00Mb
 OK (1 test, 14 assertions)
 ```
+( NOTE: Aslo you can run all the tests at once by ```phpunit -c app/``` )
