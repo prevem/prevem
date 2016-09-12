@@ -24,7 +24,7 @@ class RendererControllerTest extends PrevemTestCase
     $jsonContent = $process->getOutput();
 
     // ************ Create renderer data ***************
-    $this->client->setDefaultOption('headers', $this->getAuthorizedHeaders($url));
+    $this->client->setDefaultOption('headers', $this->prevem_util->getBearerAuthHeader($this->username));
     $rendererMetadata = $this->client
                              ->put($url . "renderer/{$renderer}")
                              ->setBody($jsonContent, 'application/json')
@@ -43,7 +43,7 @@ class RendererControllerTest extends PrevemTestCase
     // ************** Get renderer data *****************
     // to fetch all renderer data the user must have ROLE_COMPOSE role
     $url = $this->logIn('compose');
-    $this->client->setDefaultOption('headers', $this->getAuthorizedHeaders($url));
+    $this->client->setDefaultOption('headers', $this->prevem_util->getBearerAuthHeader($this->username));
     $renderers = $this->client->get($url . "renderers")
                       ->send()
                       ->json();
@@ -63,7 +63,7 @@ class RendererControllerTest extends PrevemTestCase
   public function testGetRenderersWithWrongRole() {
     // to get renderer data the user must have ROLE_COMPOSE role but user only have ROLE_RENDER which is wrong
     $url = $this->logIn('renderer');
-    $this->client->setDefaultOption('headers', $this->getAuthorizedHeaders($url));
+    $this->client->setDefaultOption('headers', $this->prevem_util->getBearerAuthHeader($this->username));
     try {
       $renderers = $this->client
                         ->get($url . "renderers")
@@ -83,7 +83,7 @@ class RendererControllerTest extends PrevemTestCase
   public function testPutRendererWithWrongRole() {
     // to create/update renderer data the user must have ROLE_RENDER role but user only have ROLE_COMPOSE which is wrong
     $url = $this->logIn('compose');
-    $this->client->setDefaultOption('headers', $this->getAuthorizedHeaders($url));
+    $this->client->setDefaultOption('headers', $this->prevem_util->getBearerAuthHeader($this->username));
     try {
       $this->client
            ->put($url . "renderer/dont-care")

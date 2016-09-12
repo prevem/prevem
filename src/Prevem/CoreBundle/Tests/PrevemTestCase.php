@@ -12,16 +12,14 @@ class PrevemTestCase extends WebTestCase
   public $client = null;
   public $em;
   public $username;
+  public $prevem_util;
 
   public function setUp() {
     static::bootKernel();
     $this->username = 'test-user-' . substr(sha1(rand()), 0, 8);
     $this->client = new Client();
     $this->em = static::$kernel->getContainer()->get('doctrine')->getManager();
-
-    //start server
-    $process = new Process('app/console server:start');
-    $process->run();
+    $this->prevem_util = static::$kernel->getContainer()->get('prevem_core.prevem_utils');
   }
 
   public function tearDown(){
@@ -60,23 +58,4 @@ class PrevemTestCase extends WebTestCase
     $this->em->flush();
   }
 
-  /**
-  * Return authorized header with JWToken
-  * @param string $url
-  * @param array $headers
-  *
-  * @return array $headers
-  */
-  public function getAuthorizedHeaders($url, $headers = array('Accept' => 'application/json')) {
-    $this->client->setDefaultOption('headers', array('Accept' => 'application/json'));
-    $jsonContent = json_encode(array('username' => $this->username));
-    $responseData = $this->client->post($url . "user/login")
-                         ->setBody($jsonContent, 'application/json')
-                         ->send()
-                         ->json();
-    $this->assertNotEmpty($responseData);
-    $headers['Authorization'] = 'Bearer ' . $responseData['token'];
-
-    return $headers;
-  }
 }

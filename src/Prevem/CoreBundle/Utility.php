@@ -63,23 +63,32 @@ class Utility {
   }
 
   /**
-  * Return valid Bearer/Basic token in header for Authorization encoded in JWT/base64_encode respectively,
-  * with $username/password information
+  * Return valid Basic token in header for Authorization encoded in base64_encode
+  *  with <username:password> information.
+  *
+  * @param string $username
+  * @param string $password
+  * @param array $headers
+  *
+  * @return array $headers
+  */
+  public function getBasicAuthHeader($username, $password, $headers = array('Accept' => 'application/json')) {
+    $headers['Authorization'] = 'Basic ' . base64_encode("{$username}:{$password}");
+
+    return $headers;
+  }
+
+  /**
+  * Return valid Basic token in header for Authorization encoded in JWT
+  *  with username information.
   *
   * @param string $username
   * @param array $headers
   *
   * @return array $headers
   */
-  public function getAuthorizedHeaders($username, $password = NULL, $auth = 'Bearer', $headers = array('Accept' => 'application/json')) {
-    if ($auth == 'Basic') {
-      $token = base64_encode("{$username}:{$password}");
-    }
-    else {
-      $token = $this->jwtEncoder->encode(['username' => $username]);
-    }
-
-    $headers['Authorization'] = sprintf("%s %s", $auth, $token);
+  public function getBearerAuthHeader($username, $headers = array('Accept' => 'application/json')) {
+    $headers['Authorization'] = 'Bearer ' . $this->jwtEncoder->encode(['username' => $username]);
 
     return $headers;
   }

@@ -58,7 +58,7 @@ class BatchCreateCommand extends ContainerAwareCommand
                       ->getKernel()
                       ->getContainer()
                       ->get('prevem_core.prevem_utils')
-                      ->getAuthorizedHeaders($username, $password, 'Basic');
+                      ->getBasicAuthHeader($username, $password);
       $client->setDefaultOption('headers', $headers);
       $client->put($url . "previewBatch/{$username}/{$batch}")
              ->setBody(json_encode($jsonContent), 'application/json')

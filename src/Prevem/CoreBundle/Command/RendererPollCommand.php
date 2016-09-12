@@ -36,7 +36,7 @@ class RendererPollCommand extends ContainerAwareCommand
                       ->getKernel()
                       ->getContainer()
                       ->get('prevem_core.prevem_utils')
-                      ->getAuthorizedHeaders($params['username'], $params['password'], 'Basic');
+                      ->getBasicAuthHeader($params['username'], $params['password']);
       $client->setDefaultOption('headers', $headers);
 
       $this->registerRenderer($input, $output, $params, $client);

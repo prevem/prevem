@@ -36,7 +36,7 @@ class PreviewBatchControllerTest extends PrevemTestCase
         )
       ),
     );
-    $this->client->setDefaultOption('headers', $this->getAuthorizedHeaders($url));
+    $this->client->setDefaultOption('headers', $this->prevem_util->getBearerAuthHeader($username));
     $this->client->put($url . "previewBatch/{$username}/{$batchName}")
                  ->setBody(json_encode($jsonContent), 'application/json')
                  ->send();
@@ -55,7 +55,7 @@ class PreviewBatchControllerTest extends PrevemTestCase
     $previewTask = $task[0];
 
     // ************ Get preview batch data ***************
-    $this->client->setDefaultOption('headers', $this->getAuthorizedHeaders($url));
+    $this->client->setDefaultOption('headers', $this->prevem_util->getBearerAuthHeader($username));
     $batches = $this->client->get($url . "previewBatch/{$username}/{$batchName}")
                       ->send()
                       ->json();
