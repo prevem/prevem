@@ -18,54 +18,49 @@ class RendererPollCommand extends ContainerAwareCommand
       $this->setName('renderer:poll')
            ->setDescription('Create new renderer')
            ->addOption('url', NULL, InputOption::VALUE_REQUIRED, 'Provide base Url')
-           ->addOption('name', NULL, InputOption::VALUE_REQUIRED, 'Renderer name')
            ->addOption('cmd', NULL, InputOption::VALUE_REQUIRED, 'Rendering script path');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-      $params = array(
-        'scriptPath' => $input->getOption('cmd'),
-        'renderer' => $input->getOption('name'),
-        'username' => parse_url($input->getOption('url'), PHP_URL_USER),
-        'password' => parse_url($input->getOption('url'), PHP_URL_PASS),
-        'url' => $input->getOption('url'),
-      );
+      $username = parse_url($input->getOption('url'), PHP_URL_USER);
+      $password = parse_url($input->getOption('url'), PHP_URL_PASS);
 
       $client = new Client();
       $headers = $this->getApplication()
                       ->getKernel()
                       ->getContainer()
                       ->get('prevem_core.prevem_utils')
-                      ->getBasicAuthHeader($params['username'], $params['password']);
+                      ->getBasicAuthHeader($username, $password);
       $client->setDefaultOption('headers', $headers);
 
-      $this->registerRenderer($input, $output, $params, $client);
-      $this->doPolling($input, $output, $params, $client);
-    }
-
-    protected function registerRenderer(InputInterface $input, OutputInterface $output, $params, $client) {
-      $io = new SymfonyStyle($input, $output);
-
-      $process = new Process(sprintf('php %s about', $params['scriptPath']));
+      $process = new Process(sprintf('php %s about', $input->getOption('cmd')));
       $process->run();
-      $jsonContent = $process->getOutput();
-
-      if (!$process->isSuccessful() || !is_array(json_decode($jsonContent, TRUE))) {
+      $rendererContent = json_decode($process->getOutput(), TRUE);
+      if (!$process->isSuccessful() || !is_array($rendererContent)) {
         $io->error('Unable to fetch data for renderer');
         exit(1);
       }
 
-      $client->put($params['url'] . "renderer/" . $params['renderer'])
-               ->setBody($jsonContent, 'application/json')
-               ->send();
-      $io->success('Updated renderer:' . $params['renderer']);
+      foreach ($rendererContent as $renderer => $params) {
+        $this->registerRenderer($input, $output, $params, $renderer, $client);
+        $this->doPolling($input, $output, $renderer, $client);
+      }
     }
 
-    protected function doPolling(InputInterface $input, OutputInterface $output, $params, $client) {
+    protected function registerRenderer(InputInterface $input, OutputInterface $output, $params, $renderer, $client) {
       $io = new SymfonyStyle($input, $output);
-      $jsonContent = json_encode(array('renderer' => $params['renderer']));
 
-      $responseData = $client->post($params['url'] . "previewTask/claim")
+      $client->put($input->getOption('url') . "renderer/{$renderer}")
+              ->setBody(json_encode($params), 'application/json')
+              ->send();
+      $io->success('Updated renderer:' . $renderer);
+    }
+
+    protected function doPolling(InputInterface $input, OutputInterface $output, $renderer, $client) {
+      $io = new SymfonyStyle($input, $output);
+      $jsonContent = json_encode(array('renderer' => $renderer));
+
+      $responseData = $client->post($input->getOption('url') . "previewTask/claim")
                              ->setBody($jsonContent, 'application/json')
                              ->send()
                              ->json();
@@ -74,12 +69,12 @@ class RendererPollCommand extends ContainerAwareCommand
         exit(1);
       }
 
-      $process = new Process(sprintf('php %s render', $params['scriptPath']));
+      $process = new Process(sprintf('php %s render', $input->getOption('cmd')));
       $process->setInput(json_encode($responseData));
       $process->run();
       $jsonContent = $process->getOutput();
 
-      $responseData = $client->post($params['url'] . "previewTask/submit")
+      $responseData = $client->post($input->getOption('url') . "previewTask/submit")
                              ->setBody($jsonContent, 'application/json')
                              ->send()
                              ->json();
