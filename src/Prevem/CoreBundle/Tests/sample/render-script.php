@@ -4,13 +4,15 @@ $action = $argv[1];
 switch($action) {
   case 'about':
     echo json_encode(array(
-      'title' => 'ThunderBird 9.0 (Ubuntu Xenial)',
-      'os' => 'linux',
-      'osVersion' => 'Ubuntu Xenial',
-      'app' => 'thunderbird',
-      'appVersion' => '9.0',
-      'icons' => array(),
-      'options' => array(),
+      'thunderlook-90-xenial' => array(
+        'title' => 'ThunderBird 9.0 (Ubuntu Xenial)',
+        'os' => 'linux',
+        'osVersion' => 'Ubuntu Xenial',
+        'app' => 'thunderbird',
+        'appVersion' => '9.0',
+        'icons' => array(),
+        'options' => array(),
+      )
     ));
     break;
   case 'render':
