@@ -37,7 +37,7 @@ class RendererPollCommandTest extends PrevemTestCase
           __DIR__
       ),
       'renderer-poll' => sprintf(
-        'app/console renderer:poll --url=%s --cmd=\'%s\'',
+        'app/console renderer:poll --url=%s --cmd=\'%s\' --interval=300 --max-tasks=1',
           $url,
           __DIR__ . '/../sample/render-script.php'
       ),

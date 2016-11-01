@@ -18,6 +18,8 @@ class RendererPollCommand extends ContainerAwareCommand
       $this->setName('renderer:poll')
            ->setDescription('Create new renderer')
            ->addOption('url', NULL, InputOption::VALUE_REQUIRED, 'Provide base Url')
+           ->addOption('interval', NULL, InputOption::VALUE_REQUIRED, 'Interval in ms')
+           ->addOption('max-tasks', NULL, InputOption::VALUE_REQUIRED, 'Maximum number of tasks to be claim')
            ->addOption('cmd', NULL, InputOption::VALUE_REQUIRED, 'Rendering script path');
     }
 
@@ -41,9 +43,13 @@ class RendererPollCommand extends ContainerAwareCommand
         exit(1);
       }
 
-      foreach ($rendererContent as $renderer => $params) {
-        $this->registerRenderer($input, $output, $params, $renderer, $client);
-        $this->doPolling($input, $output, $renderer, $client);
+      $taskCount = 0;
+      while ($taskCount < $input->getOption('max-tasks')) {
+        foreach ($rendererContent as $renderer => $params) {
+          $this->registerRenderer($input, $output, $params, $renderer, $client);
+          $this->doPolling($input, $output, $renderer, $client, $taskCount);
+        }
+        usleep(1000 * $input->getOption('interval'));
       }
     }
 
@@ -56,7 +62,7 @@ class RendererPollCommand extends ContainerAwareCommand
       $io->success('Updated renderer:' . $renderer);
     }
 
-    protected function doPolling(InputInterface $input, OutputInterface $output, $renderer, $client) {
+    protected function doPolling(InputInterface $input, OutputInterface $output, $renderer, $client, &$taskCount) {
       $io = new SymfonyStyle($input, $output);
       $jsonContent = json_encode(array('renderer' => $renderer));
 
@@ -64,9 +70,13 @@ class RendererPollCommand extends ContainerAwareCommand
                              ->setBody($jsonContent, 'application/json')
                              ->send()
                              ->json();
+
+      // increment total taskcount with number of preview tasks found
+      $taskCount += count($responseData);
+
       if (count($responseData) < 1) {
-        $io->error('There is no eligible preview task to claim');
-        exit(1);
+        $io->error('There is no eligible preview task to claim for renderer - ' . $renderer);
+        return;
       }
 
       $process = new Process(sprintf('php %s render', $input->getOption('cmd')));
