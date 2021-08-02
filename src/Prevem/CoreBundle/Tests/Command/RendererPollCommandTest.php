@@ -12,7 +12,7 @@ class RendererPollCommandTest extends PrevemTestCase
 
   protected function setUp() {
     parent::setUp();
-    $this->renderer = 'dummy-' . substr(sha1(rand()), 0, 4);
+    $this->renderer = 'thunderlook-90-xenial';
   }
 
   /**
@@ -37,9 +37,8 @@ class RendererPollCommandTest extends PrevemTestCase
           __DIR__
       ),
       'renderer-poll' => sprintf(
-        'app/console renderer:poll --url=%s --name=%s --cmd=\'%s\'',
+        'app/console renderer:poll --url=%s --cmd=\'%s\' --interval=300 --max-tasks=1',
           $url,
-          $this->renderer,
           __DIR__ . '/../sample/render-script.php'
       ),
       'execute-render-script' => sprintf('php %s about', __DIR__ . '/../sample/render-script.php'),
@@ -55,24 +54,25 @@ class RendererPollCommandTest extends PrevemTestCase
     $process->run();
     $this->assertEquals(TRUE, $process->isSuccessful());
 
-    //check if renderer is created or not
-    $renderer = $this->em->getRepository('PrevemCoreBundle:Renderer')->find($this->renderer);
-    $this->assertEquals(TRUE, !empty($renderer));
-
     // check each created renderer has correct meta-data as provided by render-script.php
     $process = new Process($testCommands['execute-render-script']);
     $process->run();
     $this->assertEquals(TRUE, $process->isSuccessful());
+    $rendererMetadata = json_decode($process->getOutput(), TRUE);
+    $rendererMetadata = $rendererMetadata[$this->renderer];
+
+    //check if renderer is created or not
+    $rendererObj = $this->em->getRepository('PrevemCoreBundle:Renderer')->find($this->renderer);
+    $this->assertEquals(TRUE, !empty($rendererObj));
 
     // Fetch renderer metadata from script that used earlier to create renderer
-    $rendererMetadata = json_decode($process->getOutput(), TRUE);
-    $this->assertEquals($renderer->getTitle(), $rendererMetadata['title']);
-    $this->assertEquals($renderer->getOs(), $rendererMetadata['os']);
-    $this->assertEquals($renderer->getOsVersion(), $rendererMetadata['osVersion']);
-    $this->assertEquals($renderer->getApp(), $rendererMetadata['app']);
-    $this->assertEquals($renderer->getAppVersion(), $rendererMetadata['appVersion']);
-    $this->assertEquals($renderer->getIcons(), $rendererMetadata['icons']);
-    $this->assertEquals($renderer->getOptions(), $rendererMetadata['options']);
+    $this->assertEquals($rendererObj->getTitle(), $rendererMetadata['title']);
+    $this->assertEquals($rendererObj->getOs(), $rendererMetadata['os']);
+    $this->assertEquals($rendererObj->getOsVersion(), $rendererMetadata['osVersion']);
+    $this->assertEquals($rendererObj->getApp(), $rendererMetadata['app']);
+    $this->assertEquals($rendererObj->getAppVersion(), $rendererMetadata['appVersion']);
+    $this->assertEquals($rendererObj->getIcons(), $rendererMetadata['icons']);
+    $this->assertEquals($rendererObj->getOptions(), $rendererMetadata['options']);
 
     // retrieve the preview task just claimed for poll
     $tasks = $this->em
