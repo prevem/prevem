@@ -91,13 +91,15 @@ This evaluates ```strotime('14 days ago')``` and finds any PreviewBatch / Previe
 Start running tests of *prevem*. These are the steps:
 
 ### 1. Install PHPUnit if not installed.
+
 ### 2. Start web server
 ``` bash
 $ cd prevem
 $ app/console server:start
 [OK] Web server listening on http://127.0.0.1:8000
 ```
-###3. Run the tests for Controllers which you will find [here](https://github.com/prevem/prevem/tree/master/src/Prevem/CoreBundle/Tests/Controller)
+
+### 3. Run the tests for Controllers which you will find [here](https://github.com/prevem/prevem/tree/master/src/Prevem/CoreBundle/Tests/Controller)
 ``` bash
 ## Run unit tests of DefaultController
 $ phpunit  -c app/  src/Prevem/CoreBundle/Tests/Controller/RendererControllerTest.php
@@ -108,7 +110,7 @@ Time: 8.76 seconds, Memory: 29.75Mb
 OK (3 tests, 17 assertions)
 ```
 
-###4. Run the tests for CLI tools which you will find [here](https://github.com/prevem/prevem/tree/master/src/Prevem/CoreBundle/Tests/Command)
+### 4. Run the tests for CLI tools which you will find [here](https://github.com/prevem/prevem/tree/master/src/Prevem/CoreBundle/Tests/Command)
 ``` bash
 ## Run unit tests of renderer:poll
 $ phpunit  -c app/  src/Prevem/CoreBundle/Tests/Command/RendererPollCommandTest.php
